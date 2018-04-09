@@ -4,65 +4,93 @@ var myElement = document.getElementById("main");
 const sections = {
   main: {
     element: document.getElementById("main"),
-    size: "tall"
+    top: 0,
+    bottom: 0,
+    link: document.getElementById("main-link")
   },
   programm: {
     element: document.getElementById("programm"),
-    size: "short"
+    top: 0,
+    bottom: 0,
+    link: document.getElementById("programm-link")
   },
   requirements: {
     element: document.getElementById("requirements"),
-    size: "short"
+    top: 0,
+    bottom: 0,
+    link: document.getElementById("requirements-link")
   },
   about: {
     element: document.getElementById("about"),
-    size: "short"
+    top: 0,
+    bottom: 0,
+    link: document.getElementById("about-link")
   },
   works: {
     element: document.getElementById("works"),
-    size: "tall"
+    top: 0,
+    bottom: 0,
+    link: document.getElementById("works-link")
   },
   contact: {
     element: document.getElementById("contact"),
-    size: "short"
+    top: 0,
+    bottom: 0,
+    link: document.getElementById("contact-link")
   }
 };
 
-const links = {
-  main: document.getElementById("main-link"),
-  programm: document.getElementById("programm-link"),
-  requirements: document.getElementById("requirements-link"),
-  about: document.getElementById("about-link"),
-  works: document.getElementById("works-link"),
-  contact: document.getElementById("contact-link")
-};
+var clientHeight = window.innerHeight;
+var lastScrollPosition = 0;
+var ticking = false;
 
-var doc = document.documentElement;
-
-for (let section in sections) {
-  let sectionWatcher = scrollMonitor.create(sections[section].element);
-  if (sections[section].size === "tall") {
-    sectionWatcher.enterViewport(function() {
-      console.log(section, 'enterViewport');
-      
-      cleanLinks();
-      addClassToElement(links[section], "menu__link--active");
-    });
-  } else {
-    sectionWatcher.fullyEnterViewport (function() {
-      console.log(section, 'fullyEnterViewport');
-      
-      cleanLinks();
-      addClassToElement(links[section], "menu__link--active");
-    });
+function setOffsets() {
+  for (let section in sections) {
+    const top = sections[section].element.getBoundingClientRect().top;
+    sections[section].top = top;
+    sections[section].bottom = top + sections[section].element.offsetHeight;
   }
 }
 
-function cleanLinks() {
-  for (let link in links) {
-    removeClassFromElement(links[link], "menu__link--active");
+setOffsets();
+processLinks(0);
+
+function processLinks(scrollPosition) {
+  for (let section in sections) {
+    const top = Math.floor(sections[section].top);
+    const bottom = Math.ceil(sections[section].bottom);
+    const position = scrollPosition + clientHeight/2;
+    if (top <= position && position < bottom) {
+      addClassToElement(sections[section].link, "menu__link--active");
+    } else {
+      removeClassFromElement(sections[section].link, "menu__link--active");
+    }
   }
 }
+
+window.addEventListener("scroll", function(e) {
+  lastScrollPosition = window.scrollY;
+
+  if (!ticking) {
+    window.requestAnimationFrame(function() {
+      processLinks(lastScrollPosition);
+      ticking = false;
+    });
+
+    ticking = true;
+  }
+});
+
+window.addEventListener("resize", function(e) {
+  if (!ticking) {
+    window.requestAnimationFrame(function() {
+      setOffsets();
+      clientHeight = window.innerHeight;
+      ticking = false;
+    });
+    ticking = true;
+  }
+});
 
 // smooth scroll on click anchor
 var SmoothScroll = new SmoothScroll(".js-scroll");
