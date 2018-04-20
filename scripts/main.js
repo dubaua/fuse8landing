@@ -86,14 +86,8 @@ if (isDesktop) {
   });
 
   window.addEventListener("resize", function(e) {
-    if (!ticking) {
-      window.requestAnimationFrame(function() {
-        setOffsets();
-        clientHeight = window.innerHeight;
-        ticking = false;
-      });
-      ticking = true;
-    }
+    setOffsets();
+    clientHeight = window.innerHeight;
   });
 
   // smooth scroll on click anchor
